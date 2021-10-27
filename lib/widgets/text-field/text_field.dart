@@ -54,6 +54,7 @@ class MyTextField extends StatelessWidget {
         valueListenable: _labelColor,
         builder: (BuildContext context, Color value, Widget? child) {
           return TextFormField(
+            cursorColor: Theme.of(context).primaryColor,
             maxLines: expanded ?? false ? null : 1,
             validator: validator,
             readOnly: readOnly ?? false,

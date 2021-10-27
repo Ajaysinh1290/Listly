@@ -18,6 +18,7 @@ import 'package:listly/utils/constants/constants.dart';
 import 'package:listly/utils/theme/color_palette.dart';
 import 'package:listly/widgets/button/my_button.dart';
 import 'package:listly/widgets/text-field/text_field.dart';
+import 'package:share/share.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 
 class Items extends StatelessWidget {
@@ -92,7 +93,7 @@ class Items extends StatelessWidget {
   }
 
   _createItem({Item? item}) {
-    ItemController itemController = Get.put(ItemController());
+    ItemController itemController = Get.find();
     itemController.titleController.text = '';
     itemController.priceController.text = '';
     itemController.qtyController.text = '';
@@ -276,8 +277,76 @@ class Items extends StatelessWidget {
     );
   }
 
+  _onTap(List<Item>? items, String title) {
+    if (items == null) {
+      return;
+    }
+    Get.bottomSheet(Container(
+        margin: EdgeInsets.all(15.w),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10.r),
+          color: Colors.white,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              height: 20.h,
+            ),
+            InkWell(
+              onTap: () {
+                Get.back();
+                _createPdf(items, title);
+              },
+              child: SizedBox(
+                width: double.infinity,
+                height: 40.h,
+                child: Text(
+                  'Create Pdf',
+                  style: Theme.of(Get.context!).textTheme.headline6,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.symmetric(vertical: 10.h),
+              width: double.infinity,
+              height: 1,
+              color: Colors.grey.shade300,
+            ),
+            SizedBox(
+              height: 10.h,
+            ),
+            InkWell(
+              onTap: () async {
+                String message = title + '\n';
+                for (Item item in items) {
+                  message +=
+                      '${item.title} (${item.price}${item.currencySymbol}) - ${item.qty} ${item.qtyType}\n';
+                }
+                Get.back();
+                await Share.share(message);
+              },
+              child: SizedBox(
+                width: double.infinity,
+                height: 40.h,
+                child: Text(
+                  'Share as Message',
+                  style: Theme.of(Get.context!).textTheme.headline6,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 10.h,
+            )
+          ],
+        )));
+  }
+
   @override
   Widget build(BuildContext context) {
+    ItemController itemController = Get.put(ItemController());
     UserController userController = Get.find();
     String title = '';
     List<Item>? list;
@@ -298,7 +367,7 @@ class Items extends StatelessWidget {
             }),
         actions: [
           IconButton(
-              onPressed: () => _createPdf(list, title),
+              onPressed: () => _onTap(list, title),
               icon: Icon(
                 Icons.description,
                 color: Colors.black,
@@ -327,86 +396,144 @@ class Items extends StatelessWidget {
                     color: ColorPalette.yellow,
                     strokeWidth: 1.4,
                   ))
-                : ListView.builder(
-                    itemCount: list!.length,
+                : ListView(
                     padding: Constants.scaffoldPadding,
-                    itemBuilder: (context, index) {
-                      Item item = list![index];
-                      return Slidable(
-                        actionPane: const SlidableDrawerActionPane(),
-                        actions: [
-                          IconSlideAction(
-                            icon: Icons.edit,
-                            caption: 'Edit',
-                            color: Colors.transparent,
-                            foregroundColor: Theme.of(context).primaryColor,
-                            onTap: () => _createItem(item: item),
-                          )
-                        ],
-                        secondaryActions: [
-                          IconSlideAction(
-                              icon: Icons.delete,
-                              caption: 'Delete',
-                              color: Colors.transparent,
-                              foregroundColor: Colors.red,
-                              onTap: () => _onDelete(item, context))
-                        ],
-                        child: Container(
-                          padding: EdgeInsets.symmetric(
-                              vertical: 10.h, horizontal: 20.w),
-                          margin: EdgeInsets.symmetric(vertical: 10.h),
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(5.r),
-                              border: Border.all(
-                                  color: Colors.grey.shade300, width: 1)),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                        item.title.isEmpty
-                                            ? 'Untitled'
-                                            : item.title,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .headline6!
-                                            .copyWith(
-                                                fontWeight: FontWeight.bold)),
-                                  ),
-                                  Text(
-                                    '${item.currencySymbol}${item.price}',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .headline5!
-                                        .copyWith(
-                                            fontFamily:
-                                                GoogleFonts.roboto().fontFamily,
-                                            fontWeight: FontWeight.bold),
-                                  )
-                                ],
-                              ),
-                              SizedBox(
-                                height: 5.h,
-                              ),
-                              Text('${item.qty} ${item.qtyType}',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .headline6!
-                                      .copyWith(
-                                        fontSize: 16.sp,
-                                      )),
-                              SizedBox(
-                                height: 5.h,
-                              ),
-                            ],
-                          ),
+                    children: [
+                      SizedBox(
+                        height: 20.h,
+                      ),
+                      MyTextField(
+                        labelText: 'Search',
+                        onChanged: (value) {
+                          itemController.searchQuery = value;
+                        },
+                        suffixIcon: Icon(
+                          Icons.search,
+                          size: 22.sp,
+                          color: Colors.black,
                         ),
-                      );
-                    });
+                      ),
+                      SizedBox(
+                        height: 10.h,
+                      ),
+                      Obx(() {
+                        List<Item>? sortedList = list;
+                        if (itemController.searchQuery.trim().isNotEmpty) {
+                          sortedList = list!
+                              .where((element) =>
+                                  element.title.toLowerCase().contains(
+                                      itemController.searchQuery
+                                          .toLowerCase()
+                                          .trim()) ||
+                                  element.qty.toString().contains(itemController
+                                      .searchQuery
+                                      .toLowerCase()
+                                      .trim()) ||
+                                  element.qtyType.toLowerCase().contains(
+                                      itemController.searchQuery
+                                          .toLowerCase()
+                                          .trim()) ||
+                                  element.price.toString().contains(
+                                      itemController.searchQuery
+                                          .toLowerCase()
+                                          .trim()) ||
+                                  element.currencySymbol.toString().contains(
+                                      itemController.searchQuery
+                                          .toLowerCase()
+                                          .trim()))
+                              .toList();
+                        }
+                        return Column(
+                          children: sortedList!
+                              .map((item) => Slidable(
+                                    actionPane:
+                                        const SlidableDrawerActionPane(),
+                                    actions: [
+                                      IconSlideAction(
+                                        icon: Icons.edit,
+                                        caption: 'Edit',
+                                        color: Colors.transparent,
+                                        foregroundColor:
+                                            Theme.of(context).primaryColor,
+                                        onTap: () => _createItem(item: item),
+                                      )
+                                    ],
+                                    secondaryActions: [
+                                      IconSlideAction(
+                                          icon: Icons.delete,
+                                          caption: 'Delete',
+                                          color: Colors.transparent,
+                                          foregroundColor: Colors.red,
+                                          onTap: () => _onDelete(item, context))
+                                    ],
+                                    child: Container(
+                                      padding: EdgeInsets.symmetric(
+                                          vertical: 10.h, horizontal: 20.w),
+                                      margin:
+                                          EdgeInsets.symmetric(vertical: 10.h),
+                                      decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(5.r),
+                                          border: Border.all(
+                                              color: Colors.grey.shade300,
+                                              width: 1)),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Expanded(
+                                                child: Text(
+                                                    item.title.isEmpty
+                                                        ? 'Untitled'
+                                                        : item.title,
+                                                    style: Theme.of(context)
+                                                        .textTheme
+                                                        .headline6!
+                                                        .copyWith(
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .bold)),
+                                              ),
+                                              Text(
+                                                '${item.currencySymbol}${item.price}',
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .headline5!
+                                                    .copyWith(
+                                                        fontFamily:
+                                                            GoogleFonts.roboto()
+                                                                .fontFamily,
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                              )
+                                            ],
+                                          ),
+                                          SizedBox(
+                                            height: 5.h,
+                                          ),
+                                          Text('${item.qty} ${item.qtyType}',
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .headline6!
+                                                  .copyWith(
+                                                    fontSize: 16.sp,
+                                                  )),
+                                          SizedBox(
+                                            height: 5.h,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ))
+                              .toList(),
+                        );
+                      })
+                    ],
+                  );
           }),
       floatingActionButton: InkWell(
         onTap: () async {

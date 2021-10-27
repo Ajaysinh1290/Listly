@@ -77,7 +77,7 @@ class HomePage extends StatelessWidget {
   }
 
   _createList({ListModel? listModel}) {
-    HomeController homeController = Get.put(HomeController());
+    HomeController homeController = Get.find();
     homeController.titleController.text = '';
     homeController.listModel = listModel;
     Get.bottomSheet(Container(
@@ -116,6 +116,7 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    HomeController homeController = Get.put(HomeController());
     UserController userController = Get.find();
     return Scaffold(
       appBar: AppBar(
@@ -157,7 +158,7 @@ class HomePage extends StatelessWidget {
               .collection('lists')
               .snapshots(),
           builder: (context, AsyncSnapshot snapshot) {
-            List? list;
+            List<ListModel>? list;
             if (snapshot.hasData) {
               list = [];
               for (var element in snapshot.data.docs) {
@@ -170,95 +171,144 @@ class HomePage extends StatelessWidget {
                     color: ColorPalette.yellow,
                     strokeWidth: 1.4,
                   ))
-                : ListView.builder(
-                    itemCount: list.length,
+                : ListView(
                     padding: Constants.scaffoldPadding,
-                    itemBuilder: (context, index) {
-                      ListModel listModel = list![index];
-                      return Slidable(
-                        actionPane: const SlidableDrawerActionPane(),
-                        actions: [
-                          IconSlideAction(
-                            icon: Icons.edit,
-                            caption: 'Edit',
-                            color: Colors.transparent,
-                            foregroundColor: Theme.of(context).primaryColor,
-                            onTap: () => _createList(listModel: listModel),
-                          )
-                        ],
-                        secondaryActions: [
-                          IconSlideAction(
-                              icon: Icons.delete,
-                              caption: 'Delete',
-                              color: Colors.transparent,
-                              foregroundColor: Colors.red,
-                              onTap: () => _onDelete(listModel, context))
-                        ],
-                        child: InkWell(
-                          onTap: () => Get.to(Items(
-                            listId: listModel.listId,
-                          )),
-                          child: Container(
-                            width: double.infinity,
-                            padding: EdgeInsets.symmetric(
-                                vertical: 10.h, horizontal: 20.w),
-                            margin: EdgeInsets.symmetric(vertical: 10.h),
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(5.r),
-                                border: Border.all(
-                                    color: Colors.grey.shade300, width: 1)),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                    listModel.title.isEmpty
-                                        ? 'Untitled'
-                                        : listModel.title,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .headline6!
-                                        .copyWith(fontWeight: FontWeight.bold)),
-                                SizedBox(
-                                  height: 5.h,
-                                ),
-                                StreamBuilder<Object>(
-                                    stream: FirebaseFirestore.instance
-                                        .collection('users')
-                                        .doc(userController.user!.userId)
-                                        .collection('lists')
-                                        .doc(listModel.listId)
-                                        .collection('items')
-                                        .snapshots(),
-                                    builder: (context, AsyncSnapshot snapshot) {
-                                      int totalItems = 0;
-                                      if (snapshot.hasData) {
-                                        totalItems = snapshot.data.docs.length;
-                                      }
-                                      return Text('$totalItems Items',
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .headline6!
-                                              .copyWith(fontSize: 16.sp));
-                                    }),
-                                SizedBox(
-                                  height: 15.h,
-                                ),
-                                Text(
-                                    'Created on ${Constants.dateFormat.format(listModel.createdOn)}',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .headline6!
-                                        .copyWith(
-                                            fontSize: 14.sp,
-                                            color:
-                                                Colors.black.withOpacity(0.2),
-                                            fontWeight: FontWeight.bold))
-                              ],
-                            ),
-                          ),
+                    children: [
+                      SizedBox(
+                        height: 20.h,
+                      ),
+                      MyTextField(
+                        labelText: 'Search',
+                        onChanged: (value) {
+                          homeController.searchQuery = value;
+                        },
+                        suffixIcon: Icon(
+                          Icons.search,
+                          size: 22.sp,
+                          color: Colors.black,
                         ),
-                      );
-                    });
+                      ),
+                      SizedBox(
+                        height: 10.h,
+                      ),
+                      Obx(() {
+                        List<ListModel>? sortedList = list;
+                        if (homeController.searchQuery.trim().isNotEmpty) {
+                          sortedList = list!
+                              .where((element) => element.title
+                                  .toLowerCase()
+                                  .contains(homeController.searchQuery
+                                      .toLowerCase()
+                                      .trim()))
+                              .toList();
+                        }
+                        return Column(
+                          children: sortedList!
+                              .map((listModel) => Slidable(
+                                    actionPane:
+                                        const SlidableDrawerActionPane(),
+                                    actions: [
+                                      IconSlideAction(
+                                        icon: Icons.edit,
+                                        caption: 'Edit',
+                                        color: Colors.transparent,
+                                        foregroundColor:
+                                            Theme.of(context).primaryColor,
+                                        onTap: () =>
+                                            _createList(listModel: listModel),
+                                      )
+                                    ],
+                                    secondaryActions: [
+                                      IconSlideAction(
+                                          icon: Icons.delete,
+                                          caption: 'Delete',
+                                          color: Colors.transparent,
+                                          foregroundColor: Colors.red,
+                                          onTap: () =>
+                                              _onDelete(listModel, context))
+                                    ],
+                                    child: InkWell(
+                                      onTap: () => Get.to(Items(
+                                        listId: listModel.listId,
+                                      )),
+                                      child: Container(
+                                        width: double.infinity,
+                                        padding: EdgeInsets.symmetric(
+                                            vertical: 10.h, horizontal: 20.w),
+                                        margin: EdgeInsets.symmetric(
+                                            vertical: 10.h),
+                                        decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(5.r),
+                                            border: Border.all(
+                                                color: Colors.grey.shade300,
+                                                width: 1)),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                                listModel.title.isEmpty
+                                                    ? 'Untitled'
+                                                    : listModel.title,
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .headline6!
+                                                    .copyWith(
+                                                        fontWeight:
+                                                            FontWeight.bold)),
+                                            SizedBox(
+                                              height: 5.h,
+                                            ),
+                                            StreamBuilder<Object>(
+                                                stream: FirebaseFirestore
+                                                    .instance
+                                                    .collection('users')
+                                                    .doc(userController
+                                                        .user!.userId)
+                                                    .collection('lists')
+                                                    .doc(listModel.listId)
+                                                    .collection('items')
+                                                    .snapshots(),
+                                                builder: (context,
+                                                    AsyncSnapshot snapshot) {
+                                                  int totalItems = 0;
+                                                  if (snapshot.hasData) {
+                                                    totalItems = snapshot
+                                                        .data.docs.length;
+                                                  }
+                                                  return Text(
+                                                      '$totalItems Items',
+                                                      style: Theme.of(context)
+                                                          .textTheme
+                                                          .headline6!
+                                                          .copyWith(
+                                                              fontSize: 16.sp));
+                                                }),
+                                            SizedBox(
+                                              height: 15.h,
+                                            ),
+                                            Text(
+                                                'Created on ${Constants.dateFormat.format(listModel.createdOn)}',
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .headline6!
+                                                    .copyWith(
+                                                        fontSize: 14.sp,
+                                                        color: Colors.black
+                                                            .withOpacity(0.2),
+                                                        fontWeight:
+                                                            FontWeight.bold))
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ))
+                              .toList(),
+                        );
+                      }),
+                    ],
+                  );
           }),
       floatingActionButton: InkWell(
         onTap: _createList,

@@ -7,6 +7,14 @@ import 'package:listly/models/list_model.dart';
 class HomeController extends GetxController {
   TextEditingController titleController = TextEditingController();
   RxBool isLoading = RxBool(false);
+  final RxString _searchQuery = RxString('');
+
+
+  String get searchQuery => _searchQuery.value;
+
+  set searchQuery(String value) {
+    _searchQuery.value = value;
+  }
 
   ListModel? _listModel;
 

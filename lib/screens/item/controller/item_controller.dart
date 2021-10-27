@@ -16,6 +16,13 @@ class ItemController extends GetxController {
   Item? _item;
 
   Item? get item => _item;
+  final RxString _searchQuery = RxString('');
+
+  String get searchQuery => _searchQuery.value;
+
+  set searchQuery(String value) {
+    _searchQuery.value = value;
+  }
 
   set item(Item? item) {
     _item = item;

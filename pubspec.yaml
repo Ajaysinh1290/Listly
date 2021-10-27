@@ -48,6 +48,7 @@ dependencies:
   open_file:
   image_picker:
   firebase_storage: ^10.0.6
+  share:
 
 
 
