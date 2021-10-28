@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:listly/controllers/auth_controller.dart';
-import 'package:listly/screens/authentication/sing_up.dart';
+import 'package:listly/screens/authentication/sign_up.dart';
 import 'package:listly/utils/constants/constants.dart';
 import 'package:listly/widgets/button/my_button.dart';
 import 'package:listly/widgets/text-field/text_field.dart';
@@ -102,7 +102,7 @@ class SignIn extends StatelessWidget {
                 GestureDetector(
                   onTap: ()=>authController.signInWithGoogle(),
                   child: Container(
-                    height: 75.h,
+                    height: 80.h,
                     decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(5.r),

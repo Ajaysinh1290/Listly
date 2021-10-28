@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:listly/controllers/user_controller.dart';
 import 'package:listly/models/user_model.dart';
-import 'package:listly/screens/authentication/sing_up.dart';
+import 'package:listly/screens/authentication/sign_up.dart';
 import 'package:listly/screens/home/home_page.dart';
 import 'package:listly/widgets/dialog/show_error_dialog.dart';
 import 'package:listly/widgets/dialog/show_successful_dialog.dart';

@@ -16,11 +16,11 @@ import 'package:listly/utils/constants/constants.dart';
 import 'package:listly/utils/theme/color_palette.dart';
 import 'package:listly/widgets/button/my_button.dart';
 import 'package:listly/widgets/dialog/show_error_dialog.dart';
-import 'package:listly/widgets/image/full_image.dart';
-import 'package:listly/widgets/image/pick_image.dart';
 
 import 'edit_email.dart';
 import 'edit_password.dart';
+import 'image/full_image.dart';
+import 'image/pick_image.dart';
 
 class UserProfile extends StatelessWidget {
   final ValueNotifier<bool> _isLoading = ValueNotifier(false);

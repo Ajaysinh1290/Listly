@@ -18,133 +18,41 @@ import 'package:listly/widgets/text-field/text_field.dart';
 class HomePage extends StatelessWidget {
   const HomePage({Key? key}) : super(key: key);
 
-  void _onDelete(ListModel listModel, BuildContext context) async {
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(Get.find<UserController>().user!.userId)
-        .collection('lists')
-        .doc(listModel.listId)
-        .delete();
-
-    bool isUndoButtonPressed = false;
-
-    Get.snackbar(
-      '',
-      '',
-      forwardAnimationCurve: Curves.elasticInOut,
-      animationDuration: const Duration(seconds: 2),
-      titleText: Text(
-        'List Deleted Successfully',
-        style: Theme.of(context)
-            .textTheme
-            .headline6!
-            .copyWith(fontWeight: FontWeight.bold),
-      ),
-      messageText: Text(
-        listModel.title.isEmpty ? 'Untitled' : listModel.title,
-        style: Theme.of(context).textTheme.headline6,
-      ),
-      boxShadows: [
-        BoxShadow(
-            offset: const Offset(0, 2),
-            blurRadius: 10,
-            color: ColorPalette.blue.withOpacity(0.05))
-      ],
-      margin: EdgeInsets.only(bottom: 40.h, left: 20.w, right: 20.w),
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.white,
-      borderRadius: 10,
-      mainButton: TextButton(
-        onPressed: () async {
-          if (!isUndoButtonPressed) {
-            isUndoButtonPressed = true;
-            Get.back();
-            await FirebaseFirestore.instance
-                .collection('users')
-                .doc(Get.find<UserController>().user!.userId)
-                .collection('lists')
-                .doc(listModel.listId)
-                .set(listModel.toJson());
-          }
-        },
-        child: Text(
-          'UNDO',
-          style: Theme.of(context).textTheme.headline6!.copyWith(
-              fontWeight: FontWeight.bold, color: ColorPalette.yellow),
-        ),
-      ),
-    );
-  }
-
-  _createList({ListModel? listModel}) {
-    HomeController homeController = Get.find();
-    homeController.titleController.text = '';
-    homeController.listModel = listModel;
-    Get.bottomSheet(Container(
-      padding: EdgeInsets.all(20.0.w),
-      color: Colors.white,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(
-            height: 10.h,
-          ),
-          MyTextField(
-            labelText: 'List Title',
-            controller: homeController.titleController,
-          ),
-          SizedBox(
-            height: 20.h,
-          ),
-          Obx(() {
-            return MyButton(
-              onPressed: () async {
-                await homeController.createTitle();
-                Get.back();
-              },
-              buttonText: listModel == null ? 'Create' : 'Update',
-              isLoading: homeController.isLoading.value,
-            );
-          }),
-          SizedBox(
-            height: 10.h,
-          ),
-        ],
-      ),
-    ));
-  }
-
   @override
   Widget build(BuildContext context) {
     HomeController homeController = Get.put(HomeController());
     UserController userController = Get.find();
     return Scaffold(
       appBar: AppBar(
+        toolbarHeight: 75.w,
         leadingWidth: 75.w,
         leading: Padding(
-          padding: EdgeInsets.all(20.0.w),
+          padding: const EdgeInsets.all(20.0),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(5.r),
             child: Obx(() {
-              return GestureDetector(
-                onTap: () => Get.to(UserProfile()),
-                child: userController.user!.profilePic != null
-                    ? Image.network(
-                        userController.user!.profilePic!,
-                        width: 85.w,
-                        height: 35.w,
-                        fit: BoxFit.cover,
-                      )
-                    : Container(
-                        width: 35.w,
-                        height: 35.w,
-                        color: ColorPalette.blue,
-                        child: Icon(
-                          Icons.person,
-                          color: Colors.white,
-                          size: 22.sp,
+              return Tooltip(
+                message: 'Your Profile',
+                child: GestureDetector(
+                  onTap: () => Get.to(UserProfile()),
+                  child: userController.user!.profilePic != null
+                      ? Image.network(
+                          userController.user!.profilePic!,
+                          width: 85.w,
+                          height: 35.w,
+                          fit: BoxFit.cover,
+                        )
+                      : Container(
+                          width: 35.w,
+                          height: 35.w,
+                          color: ColorPalette.blue,
+                          child: Icon(
+                            Icons.person,
+                            color: Colors.white,
+                            size: 22.sp,
+                          ),
                         ),
-                      ),
+                ),
               );
             }),
           ),
@@ -184,7 +92,7 @@ class HomePage extends StatelessWidget {
                         },
                         suffixIcon: Icon(
                           Icons.search,
-                          size: 22.sp,
+                          size: 30.sp,
                           color: Colors.black,
                         ),
                       ),
@@ -214,8 +122,8 @@ class HomePage extends StatelessWidget {
                                         color: Colors.transparent,
                                         foregroundColor:
                                             Theme.of(context).primaryColor,
-                                        onTap: () =>
-                                            _createList(listModel: listModel),
+                                        onTap: () => homeController.createList(
+                                            listModel: listModel),
                                       )
                                     ],
                                     secondaryActions: [
@@ -224,8 +132,8 @@ class HomePage extends StatelessWidget {
                                           caption: 'Delete',
                                           color: Colors.transparent,
                                           foregroundColor: Colors.red,
-                                          onTap: () =>
-                                              _onDelete(listModel, context))
+                                          onTap: () => homeController
+                                              .onDeleteList(listModel, context))
                                     ],
                                     child: InkWell(
                                       onTap: () => Get.to(Items(
@@ -307,23 +215,29 @@ class HomePage extends StatelessWidget {
                               .toList(),
                         );
                       }),
+                      SizedBox(
+                        height: 110.h,
+                      )
                     ],
                   );
           }),
-      floatingActionButton: InkWell(
-        onTap: _createList,
-        child: Container(
-          margin: const EdgeInsets.all(10.0),
-          width: 75.w,
-          height: 75.w,
-          decoration: BoxDecoration(
-            color: Theme.of(context).primaryColor,
-            borderRadius: BorderRadius.circular(20.r),
-          ),
-          child: Icon(
-            Icons.add,
-            color: Colors.white,
-            size: 30.sp,
+      floatingActionButton: Tooltip(
+        message: 'Add List',
+        child: InkWell(
+          onTap: homeController.createList,
+          child: Container(
+            margin: const EdgeInsets.all(10.0),
+            width: 75.w,
+            height: 75.w,
+            decoration: BoxDecoration(
+              color: Theme.of(context).primaryColor,
+              borderRadius: BorderRadius.circular(20.r),
+            ),
+            child: Icon(
+              Icons.add,
+              color: Colors.white,
+              size: 30.sp,
+            ),
           ),
         ),
       ),
