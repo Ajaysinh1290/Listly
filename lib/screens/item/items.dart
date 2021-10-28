@@ -165,34 +165,28 @@ class Items extends StatelessWidget {
                 SizedBox(
                   height: 20.h,
                 ),
-                Container(
-                  decoration: BoxDecoration(
-                      border:
-                          Border.all(color: Colors.grey.shade300, width: 1)),
-                  child: Padding(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
-                    child: Obx(() {
-                      return DropdownButton(
-                          underline: Container(),
-                          isExpanded: true,
-                          value: itemController.qtyType,
-                          onChanged: (value) {
-                            itemController.qtyType = value.toString();
-                          },
-                          items: Constants.qtyTypes
-                              .map(
-                                (value) => DropdownMenuItem(
-                                    value: value,
-                                    child: Text(value,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .headline6)),
-                              )
-                              .toList());
-                    }),
-                  ),
-                ),
+                MyTextField(
+                    labelText: 'Qty Type',
+                    controller: itemController.qtyTypeController,
+                    suffixIcon: PopupMenuButton(
+                      icon: Icon(
+                        Icons.arrow_drop_down,
+                        size: 30.sp,
+                        color: Colors.grey.shade700,
+                      ),
+                      onSelected: (String value) {
+                        itemController.qtyTypeController.text = value;
+                      },
+                      itemBuilder: (BuildContext context) {
+                        return Constants.qtyTypes
+                            .map<PopupMenuItem<String>>((value) {
+                          return PopupMenuItem(
+                              child: Text(value,
+                                  style: Theme.of(context).textTheme.headline6),
+                              value: value);
+                        }).toList();
+                      },
+                    )),
                 SizedBox(
                   height: 20.h,
                 ),

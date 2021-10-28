@@ -9,8 +9,10 @@ class ItemController extends GetxController {
   TextEditingController titleController = TextEditingController();
   TextEditingController priceController = TextEditingController();
   TextEditingController qtyController = TextEditingController();
+  TextEditingController qtyTypeController = TextEditingController();
   final RxString _currencySymbol = RxString(Constants.currencySymbols.first);
-  final RxString _qtyType = RxString(Constants.qtyTypes.first);
+
+  // final RxString _qtyType = RxString(Constants.qtyTypes.first);
   RxBool isLoading = RxBool(false);
   GlobalKey<FormState> formKey = GlobalKey();
   Item? _item;
@@ -31,7 +33,7 @@ class ItemController extends GetxController {
       priceController.text = item.price.toString();
       qtyController.text = item.qty.toString();
       currencySymbol = item.currencySymbol;
-      qtyType = item.qtyType;
+      qtyTypeController.text = item.qtyType;
     }
   }
 
@@ -39,9 +41,9 @@ class ItemController extends GetxController {
 
   String get currencySymbol => _currencySymbol.value;
 
-  set qtyType(String value) => _qtyType.value = value;
+  // set qtyType(String value) => _qtyType.value = value;
 
-  String get qtyType => _qtyType.value;
+  // String get qtyType => _qtyType.value;
 
   String? validatePrice(value) {
     if (priceController.text.trim().isEmpty) {
@@ -100,7 +102,7 @@ class ItemController extends GetxController {
         currencySymbol: currencySymbol,
         itemId: DateTime.now().millisecondsSinceEpoch.toString(),
         qty: int.parse(qtyController.text),
-        qtyType: qtyType);
+        qtyType: qtyTypeController.text);
     await FirebaseFirestore.instance
         .collection('users')
         .doc(userId)
@@ -116,7 +118,7 @@ class ItemController extends GetxController {
     item!.title = titleController.text;
     item!.price = num.parse(priceController.text);
     item!.qty = int.parse(qtyController.text);
-    item!.qtyType = qtyType;
+    item!.qtyType = qtyTypeController.text;
     item!.currencySymbol = currencySymbol;
     await FirebaseFirestore.instance
         .collection('users')

@@ -11,6 +11,7 @@ class Constants {
   static const List qtyTypes = [
     'Packet',
     'Bundle',
+    'Bunch',
     'Box',
     'Carton',
     'Kilogram',
