@@ -30,7 +30,7 @@ class AuthController extends GetxController {
 
   _setInitialScreen(User? user) async {
     if (user == null) {
-      Get.offAll(const SignUp(), transition: Transition.size);
+      Get.offAll(const SignUp());
     } else {
       isLoading.value = true;
       await FirebaseFirestore.instance
@@ -40,7 +40,7 @@ class AuthController extends GetxController {
           .then((value) {
         Get.find<UserController>().user = UserModel.fromJson(value.data()!);
       });
-      Get.offAll(const HomePage(), transition: Transition.size);
+      Get.offAll(const HomePage());
       isLoading.value = false;
     }
   }

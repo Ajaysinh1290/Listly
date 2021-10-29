@@ -72,8 +72,9 @@ class SignIn extends StatelessWidget {
                   alignment: Alignment.centerRight,
                   child: TextButton(
                       onPressed: () {
-                        Get.to(const ForgotPassword(),
-                            transition: Transition.topLevel);
+                        Get.to(
+                          const ForgotPassword(),
+                        );
                       },
                       child: Text(
                         'Forgot Password ?',
@@ -100,7 +101,7 @@ class SignIn extends StatelessWidget {
                   height: 20.h,
                 ),
                 GestureDetector(
-                  onTap: ()=>authController.signInWithGoogle(),
+                  onTap: () => authController.signInWithGoogle(),
                   child: Container(
                     height: 80.h,
                     decoration: BoxDecoration(
@@ -121,9 +122,7 @@ class SignIn extends StatelessWidget {
                         ),
                         Text(
                           'Sign in with Google',
-                          style: Theme.of(context)
-                              .textTheme
-                              .headline4,
+                          style: Theme.of(context).textTheme.headline4,
                           overflow: TextOverflow.ellipsis,
                         )
                       ],

@@ -61,7 +61,7 @@ class ForgotPassword extends StatelessWidget {
                 ),
                 Obx(() => MyButton(
                       onPressed: () => authController.forgotPassword(),
-                      buttonText: 'Forgot Password',
+                      buttonText: 'Send Mail',
                       isLoading: authController.isLoading.value,
                     ))
               ],

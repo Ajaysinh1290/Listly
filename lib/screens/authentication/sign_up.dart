@@ -89,7 +89,7 @@ class SignUp extends StatelessWidget {
                 GestureDetector(
                   onTap: () => authController.signInWithGoogle(),
                   child: Container(
-                    height: 75.h,
+                    height: 80.h,
                     decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(5.r),

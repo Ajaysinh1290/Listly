@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget with AppThemeData {
       designSize: const Size(414, 896),
       builder: () {
         return GetMaterialApp(
-          defaultTransition: Transition.topLevel,
+          defaultTransition: Transition.fadeIn,
           initialBinding: BindingsBuilder(() {
             Get.put(AuthController());
             Get.put(UserController());
@@ -56,7 +56,7 @@ class SplashScreen extends StatelessWidget {
           child: Image.asset(
             'assets/icons/Logo.png',
             fit: BoxFit.contain,
-            width: 220.w,
+            width: 230.w,
           ),
         ),
       ),
