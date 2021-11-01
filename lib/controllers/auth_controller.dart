@@ -6,7 +6,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:listly/controllers/user_controller.dart';
 import 'package:listly/models/user_model.dart';
 import 'package:listly/screens/authentication/sign_up.dart';
-import 'package:listly/screens/home/home_page.dart';
+import 'package:listly/screens/list/lists_screen.dart';
 import 'package:listly/widgets/dialog/show_error_dialog.dart';
 import 'package:listly/widgets/dialog/show_successful_dialog.dart';
 
@@ -40,7 +40,7 @@ class AuthController extends GetxController {
           .then((value) {
         Get.find<UserController>().user = UserModel.fromJson(value.data()!);
       });
-      Get.offAll(const HomePage());
+      Get.offAll(const ListsScreen());
       isLoading.value = false;
     }
   }
