@@ -2,7 +2,7 @@ class Item {
   late String itemId;
   late String title;
   late num price;
-  late int qty;
+  late num qty;
   late String qtyType;
   late String currencySymbol;
 
@@ -12,7 +12,8 @@ class Item {
       required this.price,
       required this.qty,
       required this.currencySymbol,
-      required this.qtyType});
+      required this.qtyType,
+      });
 
   Item.fromJson(Map<String, dynamic> data) {
     itemId = data['itemId'];
