@@ -40,8 +40,6 @@ class TodoItemsController extends GetxController {
 
   set item(TodoItem? item) {
     _item = item;
-    titleController.text = '';
-    isDone = false;
 
     if (item != null) {
       titleController.text = item.title;
@@ -68,6 +66,7 @@ class TodoItemsController extends GetxController {
       titleController.text = '';
       isDone = false;
       isLoading.value = false;
+      item = null;
       Get.back();
     }
   }

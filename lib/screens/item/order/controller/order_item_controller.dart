@@ -61,7 +61,7 @@ class OrderItemController extends GetxController {
     } else {
       try {
         double number = double.parse(priceController.text.trim());
-        if(number<0) {
+        if (number < 0) {
           return "Please enter positive value";
         }
       } on FormatException catch (_) {
@@ -77,7 +77,7 @@ class OrderItemController extends GetxController {
     } else {
       try {
         double number = double.parse(qtyController.text.trim());
-        if(number<0) {
+        if (number < 0) {
           return "Please enter positive value";
         }
       } on FormatException catch (_) {
@@ -107,6 +107,7 @@ class OrderItemController extends GetxController {
       priceController.text = '';
       qtyController.text = '';
       isLoading.value = false;
+      item = null;
       Get.back();
     }
   }
@@ -130,7 +131,7 @@ class OrderItemController extends GetxController {
         .set(item!.toJson());
     listModel.items ??= [];
     listModel.items!.add(item!.itemId);
-    list??=[];
+    list ??= [];
     list?.add(item!);
     FirebaseFirestore.instance
         .collection('users')
@@ -162,12 +163,12 @@ class OrderItemController extends GetxController {
     _saveQty(item, listModel);
   }
 
-  onIncrement(OrderItem item, ListModel listModel)  {
+  onIncrement(OrderItem item, ListModel listModel) {
     item.qty += 1;
     _saveQty(item, listModel);
   }
 
-  _saveQty(OrderItem item, ListModel listModel)  {
+  _saveQty(OrderItem item, ListModel listModel) {
     refreshDataOnScreen();
     FirebaseFirestore.instance
         .collection('users')

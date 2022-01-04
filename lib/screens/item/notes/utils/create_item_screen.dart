@@ -23,14 +23,16 @@ class CreateItemScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     NotesController itemController = Get.find();
-    itemController.item = item;
+    if(item!=null) {
+      itemController.item = item;
+    }
     return Scaffold(
       appBar: AppBar(
-        title: Text("Note"),
+        title: const Text("Note"),
         actions: [
           if (item != null)
             IconButton(
-              icon: Icon(Icons.delete,size: 20,color: Colors.red,),
+              icon: const Icon(Icons.delete,size: 20,color: Colors.red,),
               onPressed: () {
                 Get.back();
                 onDeleteItem(item!,listModel);

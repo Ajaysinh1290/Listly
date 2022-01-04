@@ -13,7 +13,7 @@ import 'package:listly/models/list_model.dart';
 import 'package:listly/models/items/order_item.dart';
 import 'package:listly/screens/item/order/utils/create_item_dialog.dart';
 import 'package:listly/screens/item/order/utils/delete_item.dart';
-import 'package:listly/screens/item/order/utils/set_default_data.dart';
+import 'package:listly/screens/item/order/utils/reset_data.dart';
 import 'package:listly/screens/item/order/utils/share_data_dialog.dart';
 import 'package:listly/utils/constants/constants.dart';
 import 'package:listly/utils/theme/color_palette.dart';

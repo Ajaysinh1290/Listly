@@ -11,7 +11,10 @@ import 'package:listly/models/items/order_item.dart';
 
 createItemDialog(ListModel listModel, {OrderItem? item}) {
   OrderItemController itemController = Get.find();
-  itemController.item = item;
+  if (item != null) {
+    itemController.item = item;
+  }
+
   Get.bottomSheet(Container(
     padding: EdgeInsets.all(20.0.w),
     color: Colors.white,
@@ -48,18 +51,18 @@ createItemDialog(ListModel listModel, {OrderItem? item}) {
                       items: Constants.currencySymbols
                           .map(
                             (value) => DropdownMenuItem(
-                            value: value,
-                            child: Text(
-                              value,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .headline4!
-                                  .copyWith(
-                                  fontFamily:
-                                  GoogleFonts.roboto().fontFamily,
-                                  fontWeight: FontWeight.normal),
-                            )),
-                      )
+                                value: value,
+                                child: Text(
+                                  value,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headline4!
+                                      .copyWith(
+                                          fontFamily:
+                                              GoogleFonts.roboto().fontFamily,
+                                          fontWeight: FontWeight.normal),
+                                )),
+                          )
                           .toList());
                 }),
               ),

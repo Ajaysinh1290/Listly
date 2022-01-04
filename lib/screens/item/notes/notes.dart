@@ -11,7 +11,6 @@ import 'package:intl/intl.dart';
 import 'package:listly/controllers/user_controller.dart';
 import 'package:listly/models/items/notes.dart';
 import 'package:listly/models/list_model.dart';
-import 'package:listly/screens/item/notes/utils/create_item_dialog.dart';
 import 'package:listly/screens/item/notes/utils/create_item_screen.dart';
 import 'package:listly/screens/item/notes/utils/delete_item.dart';
 import 'package:listly/screens/item/notes/utils/share_data_dialog.dart';
@@ -245,9 +244,18 @@ class Notes extends StatelessWidget {
                                                           Theme.of(context)
                                                               .primaryColor,
                                                       onTap: () {
-                                                        createItemDialog(
-                                                            listModel!,
-                                                            item: item);
+                                                        itemController
+                                                            .titleController
+                                                            .text = item.title;
+                                                        itemController
+                                                            .descriptionController
+                                                            .text = item
+                                                                .description ??
+                                                            '';
+
+                                                        Get.to(CreateItemScreen(
+                                                          listModel!,
+                                                        ));
                                                       },
                                                     )
                                                   ],

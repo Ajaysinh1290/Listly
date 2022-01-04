@@ -12,7 +12,6 @@ import 'package:listly/models/items/todo_item.dart';
 import 'package:listly/models/list_model.dart';
 import 'package:listly/screens/item/todo/utils/delete_item.dart';
 import 'package:listly/screens/item/todo/utils/create_item_dialog.dart';
-import 'package:listly/screens/item/todo/utils/set_default_data.dart';
 import 'package:listly/screens/item/todo/utils/share_data_dialog.dart';
 import 'package:listly/utils/constants/constants.dart';
 import 'package:listly/utils/theme/color_palette.dart';
@@ -237,9 +236,11 @@ class TodoItems extends StatelessWidget {
                                                           Theme.of(context)
                                                               .primaryColor,
                                                       onTap: () {
+                                                        itemController.titleController.text = item.title;
+                                                        itemController.isDone = item.isDone;
                                                         createItemDialog(
                                                             listModel!,
-                                                            item: item);
+                                                           );
                                                       },
                                                     )
                                                   ],

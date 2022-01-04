@@ -62,6 +62,7 @@ class NotesController extends GetxController {
       titleController.text = '';
       descriptionController.text = '';
       isLoading.value = false;
+      item = null;
       Get.back();
     }
   }

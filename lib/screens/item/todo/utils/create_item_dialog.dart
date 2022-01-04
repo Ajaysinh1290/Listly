@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:listly/models/items/todo_item.dart';
@@ -10,7 +9,10 @@ import 'package:get/get.dart';
 
 createItemDialog(ListModel listModel, {TodoItem? item}) {
   TodoItemsController itemController = Get.find();
-  itemController.item = item;
+  if (item != null) {
+    itemController.item = item;
+  }
+
   Get.bottomSheet(Container(
     padding: EdgeInsets.all(20.0.w),
     color: Colors.white,
