@@ -8,7 +8,7 @@ It is truly usable with great user experience. It is designed to help you keep t
     <img src="Mockup.png" width="100%">
 </div>
 
-###Features
+### Features
 
 <ol>
     <li>Easy login & registration</li>   
@@ -23,7 +23,7 @@ It is truly usable with great user experience. It is designed to help you keep t
     <li>Prioritize your tasks with reordering items</li>
 </ol>
 
-###Use Checklist for different purposes
+### Use Checklist for different purposes
 
 <ul>
     <li>To-do List</li>   
