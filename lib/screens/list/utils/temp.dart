@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:listly/models/item.dart';
 import 'package:listly/models/list_model.dart';
+import 'package:listly/models/items/order_item.dart';
 
 class Temp extends StatelessWidget {
   final ValueNotifier<bool> isLoading = ValueNotifier(true);
@@ -60,7 +60,7 @@ class Temp extends StatelessWidget {
         .get()
         .then((value) {
       for (var element in value.docs) {
-        Item item = Item.fromJson(element.data());
+        OrderItem item = OrderItem.fromJson(element.data());
         items.add(item.itemId);
       }
     });

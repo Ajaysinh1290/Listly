@@ -9,20 +9,22 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:listly/controllers/user_controller.dart';
-import 'package:listly/models/item.dart';
 import 'package:listly/models/list_model.dart';
-import 'package:listly/screens/item/controller/item_controller.dart';
-import 'package:listly/screens/item/utils/share_data_dialog.dart';
+import 'package:listly/models/items/order_item.dart';
+import 'package:listly/screens/item/order/utils/create_item_dialog.dart';
+import 'package:listly/screens/item/order/utils/delete_item.dart';
+import 'package:listly/screens/item/order/utils/set_default_data.dart';
+import 'package:listly/screens/item/order/utils/share_data_dialog.dart';
 import 'package:listly/utils/constants/constants.dart';
 import 'package:listly/utils/theme/color_palette.dart';
 import 'package:listly/widgets/text-field/text_field.dart';
-import 'utils/create_item_dialog.dart';
-import 'utils/delete_item.dart';
 
-class Items extends StatelessWidget {
+import 'controller/order_item_controller.dart';
+
+class OrderItems extends StatelessWidget {
   final String listId;
 
-  const Items({Key? key, required this.listId}) : super(key: key);
+  const OrderItems({Key? key, required this.listId}) : super(key: key);
 
   formatNumber(num number) {
     var _formattedNumber = NumberFormat.compactCurrency(
@@ -35,10 +37,10 @@ class Items extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     ListModel? listModel;
-    ItemController itemController = Get.put(ItemController());
+    OrderItemController itemController = Get.put(OrderItemController());
     UserController userController = Get.find();
     String title = '';
-    List<Item>? list;
+
     return Scaffold(
       appBar: AppBar(
         title: StreamBuilder<Object>(
@@ -56,22 +58,33 @@ class Items extends StatelessWidget {
             }),
         actions: [
           IconButton(
+              tooltip: 'Reset Orders',
+              padding: EdgeInsets.zero,
+              onPressed: () => resetOrders(listId),
+              icon: const Icon(
+                Icons.restore,
+                color: Colors.black,
+                size: 20,
+              )),
+          IconButton(
               tooltip: 'Share Data',
-              onPressed: () => shareDataDialog(list, title, listId),
+              padding: EdgeInsets.zero,
+              onPressed: () =>
+                  shareDataDialog(itemController.list, title, listId),
               icon: const Icon(
                 Icons.description,
                 color: Colors.black,
                 size: 20,
-              ))
+              )),
         ],
       ),
-      body: StreamBuilder(
-          stream: FirebaseFirestore.instance
+      body: FutureBuilder(
+          future: FirebaseFirestore.instance
               .collection('users')
               .doc(userController.user!.userId)
               .collection('lists')
               .doc(listId)
-              .snapshots(),
+              .get(),
           builder: (context, AsyncSnapshot snapshot) {
             if (snapshot.hasData) {
               listModel = ListModel.fromJson(snapshot.data.data());
@@ -81,36 +94,37 @@ class Items extends StatelessWidget {
                     color: ColorPalette.yellow,
                     strokeWidth: 1,
                   )
-                : StreamBuilder<Object>(
-                    stream: FirebaseFirestore.instance
+                : FutureBuilder<Object>(
+                    future: FirebaseFirestore.instance
                         .collection('users')
                         .doc(userController.user!.userId)
                         .collection('lists')
                         .doc(listId)
                         .collection('items')
-                        .snapshots(),
+                        .get(),
                     builder: (context, AsyncSnapshot snapshot) {
                       if (snapshot.hasData) {
-                        List<Item> tempList = [];
+                        List<OrderItem> tempList = [];
                         for (var element in snapshot.data.docs) {
-                          tempList.add(Item.fromJson(element.data()));
+                          tempList.add(OrderItem.fromJson(element.data()));
                         }
-                        list = [];
-                        list!.addAll(tempList);
+
+                        itemController.list = [];
+                        itemController.list!.addAll(tempList);
                         if (listModel!.items != null) {
                           for (var element in tempList) {
                             if (listModel!.items!.contains(element.itemId)) {
-                              list!.remove(element);
+                              itemController.list!.remove(element);
                               int index =
                                   listModel!.items!.indexOf(element.itemId);
-                              if (index <= list!.length) {
-                                list!.insert(index, element);
+                              if (index <= itemController.list!.length) {
+                                itemController.list!.insert(index, element);
                               }
                             }
                           }
                         }
                       }
-                      return list == null
+                      return itemController.list == null
                           ? Center(
                               child: CircularProgressIndicator(
                               color: ColorPalette.yellow,
@@ -164,11 +178,12 @@ class Items extends StatelessWidget {
                                   ),
                                   Expanded(
                                     child: Obx(() {
-                                      List<Item>? sortedList = list;
+                                      List<OrderItem>? sortedList =
+                                          itemController.list;
                                       if (itemController.searchQuery
                                           .trim()
                                           .isNotEmpty) {
-                                        sortedList = list!
+                                        sortedList = itemController.list!
                                             .where((element) =>
                                                 element.title
                                                     .toLowerCase()
@@ -179,10 +194,8 @@ class Items extends StatelessWidget {
                                                     itemController.searchQuery
                                                         .toLowerCase()
                                                         .trim()) ||
-                                                element.qtyType
-                                                    .toLowerCase()
-                                                    .contains(itemController
-                                                        .searchQuery
+                                                element.qtyType.toLowerCase().contains(
+                                                    itemController.searchQuery
                                                         .toLowerCase()
                                                         .trim()) ||
                                                 element.price.toString().contains(
@@ -198,46 +211,36 @@ class Items extends StatelessWidget {
                                         padding: EdgeInsets.only(bottom: 120.h),
                                         onReorder: (int oldSortedIndex,
                                             int newSortedIndex) async {
-                                          int oldIndex = oldSortedIndex;
-                                          int newIndex = newSortedIndex;
                                           if (itemController.searchQuery
                                               .trim()
                                               .isNotEmpty) {
-                                            oldIndex = listModel!.items!
-                                                .indexOf(
-                                                    sortedList![oldSortedIndex]
-                                                        .itemId);
-                                            newIndex = newSortedIndex <
-                                                    sortedList.length
-                                                ? listModel!.items!.indexOf(
-                                                    sortedList[newSortedIndex]
-                                                        .itemId)
-                                                : list!.length;
+                                            Get.showSnackbar(GetBar(
+                                              backgroundColor:
+                                                  ColorPalette.yellow,
+                                              duration:
+                                                  const Duration(seconds: 2),
+                                              message:
+                                                  "List can't be reordered while searching item",
+                                            ));
+                                            return;
                                           }
-
-                                          debugPrint('old Index : $oldIndex');
-                                          debugPrint('new Index : $newIndex');
+                                          int oldIndex = oldSortedIndex;
+                                          int newIndex = newSortedIndex;
                                           if (oldIndex < newIndex) {
                                             newIndex -= 1;
-                                            debugPrint(
-                                                'new Index changing to : $newIndex');
                                           }
-                                          List newList = [];
-                                          newList.addAll(
-                                              listModel!.items!.toList());
-                                          debugPrint(
-                                              'Items before : ${newList}');
-
                                           final item =
-                                              newList.removeAt(oldIndex);
-                                          print('item deleted : ${item}');
-                                          debugPrint(
-                                              'Items after removing item : ${newList}');
-                                          newList.insert(newIndex, item);
-                                          debugPrint(
-                                              'Items after inserting item : ${newList}');
-                                          print(newList.length);
-                                          await FirebaseFirestore.instance
+                                              sortedList?.removeAt(oldIndex);
+                                          sortedList?.insert(newIndex, item!);
+                                          itemController.list = [];
+                                          itemController.list
+                                              ?.addAll(sortedList!);
+
+                                          List<String> newList = [];
+                                          sortedList?.forEach((element) {
+                                            newList.add(element.itemId);
+                                          });
+                                          FirebaseFirestore.instance
                                               .collection('users')
                                               .doc(userController.user!.userId)
                                               .collection('lists')
@@ -382,33 +385,35 @@ class Items extends StatelessWidget {
                                                                 flex: 2,
                                                                 child: Row(
                                                                   children: [
-                                                                    AbsorbPointer(
-                                                                      absorbing:
-                                                                          item.qty ==
-                                                                              0,
+                                                                    InkWell(
+                                                                      onTap:
+                                                                          () {
+                                                                        if (item.qty !=
+                                                                            0) {
+                                                                          itemController.onDecrement(
+                                                                              item,
+                                                                              listModel!);
+                                                                        }
+                                                                      },
                                                                       child:
-                                                                          InkWell(
-                                                                        onTap: () => itemController.onDecrement(
-                                                                            item,
-                                                                            listModel!),
+                                                                          Padding(
+                                                                        padding:
+                                                                            const EdgeInsets.all(10.0),
                                                                         child:
-                                                                            Padding(
-                                                                          padding:
-                                                                              const EdgeInsets.all(10.0),
+                                                                            Container(
                                                                           child:
-                                                                              Container(
-                                                                            child:
-                                                                                Icon(
-                                                                              Icons.remove,
-                                                                              size: 20.sp,
-                                                                              color: Colors.white,
-                                                                            ),
-                                                                            color: ColorPalette.yellow.withOpacity(item.qty == 0
-                                                                                ? 0.4
-                                                                                : 1),
-                                                                            padding:
-                                                                                EdgeInsets.symmetric(horizontal: 5.w),
+                                                                              Icon(
+                                                                            Icons.remove,
+                                                                            size:
+                                                                                20.sp,
+                                                                            color:
+                                                                                Colors.white,
                                                                           ),
+                                                                          color: ColorPalette.yellow.withOpacity(item.qty == 0
+                                                                              ? 0.4
+                                                                              : 1),
+                                                                          padding:
+                                                                              EdgeInsets.symmetric(horizontal: 5.w),
                                                                         ),
                                                                       ),
                                                                     ),

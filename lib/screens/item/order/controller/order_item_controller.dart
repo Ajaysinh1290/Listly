@@ -3,11 +3,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:listly/controllers/user_controller.dart';
-import 'package:listly/models/item.dart';
 import 'package:listly/models/list_model.dart';
+import 'package:listly/models/items/order_item.dart';
 import 'package:listly/utils/constants/constants.dart';
 
-class ItemController extends GetxController {
+class OrderItemController extends GetxController {
   TextEditingController titleController = TextEditingController();
   TextEditingController priceController = TextEditingController();
   TextEditingController qtyController = TextEditingController();
@@ -15,13 +15,19 @@ class ItemController extends GetxController {
   TextEditingController searchController = TextEditingController();
   final RxString _currencySymbol = RxString(Constants.currencySymbols.first);
   FocusNode searchFocusNode = FocusNode();
+  final Rx<List<OrderItem>?> _list = Rxn<List<OrderItem>?>();
 
-  // final RxString _qtyType = RxString(Constants.qtyTypes.first);
+  set list(List<OrderItem>? value) {
+    _list.value = value;
+  } // final RxString _qtyType = RxString(Constants.qtyTypes.first);
+
+  List<OrderItem>? get list => _list.value;
+
   RxBool isLoading = RxBool(false);
   GlobalKey<FormState> formKey = GlobalKey();
-  Item? _item;
+  OrderItem? _item;
 
-  Item? get item => _item;
+  OrderItem? get item => _item;
   final RxString _searchQuery = RxString('');
 
   String get searchQuery => _searchQuery.value;
@@ -30,8 +36,12 @@ class ItemController extends GetxController {
     _searchQuery.value = value;
   }
 
-  set item(Item? item) {
+  set item(OrderItem? item) {
     _item = item;
+    titleController.text = '';
+    priceController.text = '';
+    qtyController.text = '';
+
     if (item != null) {
       titleController.text = item.title;
       priceController.text = item.price.toString();
@@ -50,9 +60,12 @@ class ItemController extends GetxController {
       return 'Price can\'t be empty';
     } else {
       try {
-        double.parse(priceController.text.trim());
+        double number = double.parse(priceController.text.trim());
+        if(number<0) {
+          return "Please enter positive value";
+        }
       } on FormatException catch (_) {
-        return 'Only numbers are allowed';
+        return 'Please enter numeric characters only';
       }
     }
     return null;
@@ -63,9 +76,12 @@ class ItemController extends GetxController {
       return 'Price can\'t be empty';
     } else {
       try {
-        double.parse(qtyController.text.trim());
+        double number = double.parse(qtyController.text.trim());
+        if(number<0) {
+          return "Please enter positive value";
+        }
       } on FormatException catch (_) {
-        return 'Only numbers are allowed';
+        return 'Please enter numeric characters only';
       }
     }
     return null;
@@ -86,6 +102,7 @@ class ItemController extends GetxController {
       } else {
         await updateItem(listModel.listId);
       }
+      refreshDataOnScreen();
       titleController.text = '';
       priceController.text = '';
       qtyController.text = '';
@@ -96,14 +113,14 @@ class ItemController extends GetxController {
 
   addItem(ListModel listModel) async {
     String userId = Get.find<UserController>().user!.userId;
-    item = Item(
+    item = OrderItem(
         title: titleController.text,
         price: num.parse(priceController.text),
         currencySymbol: currencySymbol,
         itemId: DateTime.now().millisecondsSinceEpoch.toString(),
         qty: num.parse(qtyController.text),
         qtyType: qtyTypeController.text);
-    await FirebaseFirestore.instance
+    FirebaseFirestore.instance
         .collection('users')
         .doc(userId)
         .collection('lists')
@@ -113,7 +130,9 @@ class ItemController extends GetxController {
         .set(item!.toJson());
     listModel.items ??= [];
     listModel.items!.add(item!.itemId);
-    await FirebaseFirestore.instance
+    list??=[];
+    list?.add(item!);
+    FirebaseFirestore.instance
         .collection('users')
         .doc(userId)
         .collection('lists')
@@ -128,7 +147,7 @@ class ItemController extends GetxController {
     item!.qty = int.parse(qtyController.text);
     item!.qtyType = qtyTypeController.text;
     item!.currencySymbol = currencySymbol;
-    await FirebaseFirestore.instance
+    FirebaseFirestore.instance
         .collection('users')
         .doc(userId)
         .collection('lists')
@@ -138,18 +157,19 @@ class ItemController extends GetxController {
         .set(item!.toJson());
   }
 
-  onDecrement(Item item, ListModel listModel) async {
+  onDecrement(OrderItem item, ListModel listModel) async {
     item.qty -= 1;
-    await _saveQty(item, listModel);
+    _saveQty(item, listModel);
   }
 
-  onIncrement(Item item, ListModel listModel) async {
+  onIncrement(OrderItem item, ListModel listModel)  {
     item.qty += 1;
-    await _saveQty(item, listModel);
+    _saveQty(item, listModel);
   }
 
-  _saveQty(Item item, ListModel listModel) async {
-    await FirebaseFirestore.instance
+  _saveQty(OrderItem item, ListModel listModel)  {
+    refreshDataOnScreen();
+    FirebaseFirestore.instance
         .collection('users')
         .doc(Get.find<UserController>().user!.userId)
         .collection('lists')
@@ -157,5 +177,11 @@ class ItemController extends GetxController {
         .collection('items')
         .doc(item.itemId)
         .set({'qty': item.qty}, SetOptions(merge: true));
+  }
+
+  refreshDataOnScreen() {
+    List<OrderItem>? tempList = list;
+    list = [];
+    list?.addAll(tempList!);
   }
 }

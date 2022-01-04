@@ -1,3 +1,5 @@
+import 'package:listly/models/referral_list.dart';
+
 class UserModel {
   late String userId;
   late String userName;
@@ -22,7 +24,7 @@ class UserModel {
       'userId': userId,
       'userName': userName,
       'profilePic': profilePic,
-      'email': email
+      'email': email,
     };
   }
 }

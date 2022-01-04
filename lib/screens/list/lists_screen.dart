@@ -7,12 +7,15 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:get/get.dart';
 import 'package:listly/controllers/user_controller.dart';
 import 'package:listly/models/list_model.dart';
-import 'package:listly/screens/item/items.dart';
+import 'package:listly/screens/item/notes/notes.dart';
+import 'package:listly/screens/item/order/order_items.dart';
+import 'package:listly/screens/item/todo/todo_items.dart';
 import 'package:listly/screens/list/utils/list_delete_confirmation_dialog.dart';
-import 'package:listly/screens/list/utils/temp.dart';
 import 'package:listly/screens/profile/user_profile.dart';
 import 'package:listly/utils/constants/constants.dart';
+import 'package:listly/utils/constants/list_type.dart';
 import 'package:listly/utils/theme/color_palette.dart';
+import 'package:listly/widgets/dialog/show_error_dialog.dart';
 import 'package:listly/widgets/text-field/text_field.dart';
 
 import 'controller/list_controller.dart';
@@ -23,7 +26,7 @@ class ListsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    ListController homeController = Get.put(ListController());
+    ListController listsController = Get.put(ListController());
     UserController userController = Get.find();
     return Scaffold(
       appBar: AppBar(
@@ -61,12 +64,6 @@ class ListsScreen extends StatelessWidget {
           ),
         ),
         title: const Text('Listly'),
-        actions: [
-          IconButton(
-            onPressed: () => Get.to(Temp()),
-            icon: const Icon(Icons.restore),
-          )
-        ],
       ),
       body: StreamBuilder<Object>(
           stream: FirebaseFirestore.instance
@@ -97,27 +94,27 @@ class ListsScreen extends StatelessWidget {
                         ),
                         MyTextField(
                           labelText: 'Search',
-                          focusNode: homeController.searchFocusNode,
-                          controller: homeController.searchController,
+                          focusNode: listsController.searchFocusNode,
+                          controller: listsController.searchController,
                           onChanged: (value) {
-                            homeController.searchQuery = value;
+                            listsController.searchQuery = value;
                           },
                           suffixIcon: IconButton(
                             onPressed: () {
-                              if (homeController.searchQuery.isNotEmpty) {
-                                homeController.searchController.text = '';
-                                homeController.searchQuery = '';
+                              if (listsController.searchQuery.isNotEmpty) {
+                                listsController.searchController.text = '';
+                                listsController.searchQuery = '';
                                 return;
                               }
-                              if (homeController.searchFocusNode.hasFocus) {
-                                homeController.searchFocusNode.unfocus();
+                              if (listsController.searchFocusNode.hasFocus) {
+                                listsController.searchFocusNode.unfocus();
                               } else {
-                                homeController.searchFocusNode.requestFocus();
+                                listsController.searchFocusNode.requestFocus();
                               }
                             },
                             icon: Obx(
                               () => Icon(
-                                homeController.searchQuery.isEmpty
+                                listsController.searchQuery.isEmpty
                                     ? Icons.search
                                     : Icons.clear,
                                 size: 30.sp,
@@ -132,11 +129,11 @@ class ListsScreen extends StatelessWidget {
                         Expanded(
                           child: Obx(() {
                             List<ListModel>? sortedList = list;
-                            if (homeController.searchQuery.trim().isNotEmpty) {
+                            if (listsController.searchQuery.trim().isNotEmpty) {
                               sortedList = list!
                                   .where((element) => element.title
                                       .toLowerCase()
-                                      .contains(homeController.searchQuery
+                                      .contains(listsController.searchQuery
                                           .toLowerCase()
                                           .trim()))
                                   .toList();
@@ -168,13 +165,31 @@ class ListsScreen extends StatelessWidget {
                                                 showDeleteConfirmationDialog(
                                                     listModel);
                                               }),
-                                          // onTap: () => homeController
+                                          // onTap: () => listsController
                                           //     .onDeleteList(listModel, context))
                                         ],
                                         child: InkWell(
-                                          onTap: () => Get.to(Items(
-                                            listId: listModel.listId,
-                                          )),
+                                          onTap: () {
+                                            if (listModel.listType ==
+                                                ListType.orders) {
+                                              Get.to(OrderItems(
+                                                listId: listModel.listId,
+                                              ));
+                                            } else if (listModel.listType ==
+                                                ListType.todos) {
+                                              Get.to(TodoItems(
+                                                listId: listModel.listId,
+                                              ));
+                                            } else if (listModel.listType ==
+                                                ListType.notes) {
+                                              Get.to(Notes(
+                                                listId: listModel.listId,
+                                              ));
+                                            } else {
+                                              showErrorDialog("Error",
+                                                  "Something went wrong");
+                                            }
+                                          },
                                           child: Container(
                                             width: double.infinity,
                                             padding: EdgeInsets.symmetric(
@@ -207,7 +222,7 @@ class ListsScreen extends StatelessWidget {
                                                   height: 5.h,
                                                 ),
                                                 Text(
-                                                    '${(listModel.items?.length) ?? 0} Items',
+                                                    '${listModel.listType} - ${(listModel.items?.length) ?? 0} Items',
                                                     style: Theme.of(context)
                                                         .textTheme
                                                         .headline6!

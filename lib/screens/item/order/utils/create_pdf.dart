@@ -1,13 +1,15 @@
+
 import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter/services.dart';
-import 'package:listly/models/item.dart';
-import 'package:listly/screens/item/utils/save_and_launch_file.dart';
+import 'package:listly/models/items/order_item.dart';
+import 'package:listly/screens/item/order/utils/save_and_launch_file.dart';
 import 'package:listly/utils/constants/constants.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 
-Future<void> createPdf(List<Item>? items, String title,String listId) async {
+Future<void> createPdf(List<OrderItem>? items, String title,
+    String listId) async {
   PdfDocument document = PdfDocument();
   final page = document.pages.add();
   final ByteData data =
@@ -15,15 +17,23 @@ Future<void> createPdf(List<Item>? items, String title,String listId) async {
   final fontData =
   data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
   final Size pageSize = page.getClientSize();
-  page.graphics.drawString(title, PdfTrueTypeFont(fontData, 30),
-      bounds: Rect.fromLTWH(0, 20, pageSize.width - 200, 100));
+  final PdfLayoutResult layoutResult = PdfTextElement(
+      text: title,
+      font: PdfTrueTypeFont(fontData, 25,style: PdfFontStyle.bold),
+      brush: PdfSolidBrush(PdfColor(0, 0, 0)))
+      .draw(
+      page: page,
+      bounds: Rect.fromLTWH(
+          0, 0, page.getClientSize().width, page.getClientSize().height),
+      format: PdfLayoutFormat(layoutType: PdfLayoutType.paginate))!;
+
   page.graphics.drawString(
     'Date : ' + Constants.onlyDateFormat.format(DateTime.now()),
     PdfTrueTypeFont(
       fontData,
       22,
     ),
-    bounds: Rect.fromLTWH(pageSize.width - 180, 25, pageSize.width, 40),
+    bounds: Rect.fromLTWH(pageSize.width - 180, 0, pageSize.width, 40),
   );
 
   PdfGrid grid = PdfGrid();
@@ -45,7 +55,7 @@ Future<void> createPdf(List<Item>? items, String title,String listId) async {
 
   if (items != null) {
     for (int i = 0; i < items.length; i++) {
-      Item item = items[i];
+      OrderItem item = items[i];
       PdfGridRow row = grid.rows.add();
       row.cells[0].value = (i + 1).toString();
       row.cells[1].value = item.title;
@@ -66,7 +76,7 @@ Future<void> createPdf(List<Item>? items, String title,String listId) async {
   }
   grid.draw(
       page: page,
-      bounds: Rect.fromLTWH(0, 110, pageSize.width, pageSize.height));
+      bounds: Rect.fromLTWH(0, layoutResult.bounds.bottom+30, pageSize.width, pageSize.height));
   List<int> bytes = document.save();
   document.dispose();
 

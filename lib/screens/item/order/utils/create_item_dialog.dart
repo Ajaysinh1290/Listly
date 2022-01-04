@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:listly/models/item.dart';
 import 'package:listly/models/list_model.dart';
+import 'package:listly/screens/item/order/controller/order_item_controller.dart';
 import 'package:listly/utils/constants/constants.dart';
 import 'package:listly/widgets/button/my_button.dart';
 import 'package:listly/widgets/text-field/text_field.dart';
 import 'package:get/get.dart';
-import '../controller/item_controller.dart';
+import 'package:listly/models/items/order_item.dart';
 
-createItemDialog(ListModel listModel, {Item? item}) {
-  ItemController itemController = Get.find();
+createItemDialog(ListModel listModel, {OrderItem? item}) {
+  OrderItemController itemController = Get.find();
   itemController.item = item;
   Get.bottomSheet(Container(
     padding: EdgeInsets.all(20.0.w),
@@ -48,18 +48,18 @@ createItemDialog(ListModel listModel, {Item? item}) {
                       items: Constants.currencySymbols
                           .map(
                             (value) => DropdownMenuItem(
-                                value: value,
-                                child: Text(
-                                  value,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .headline4!
-                                      .copyWith(
-                                          fontFamily:
-                                              GoogleFonts.roboto().fontFamily,
-                                          fontWeight: FontWeight.normal),
-                                )),
-                          )
+                            value: value,
+                            child: Text(
+                              value,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .headline4!
+                                  .copyWith(
+                                  fontFamily:
+                                  GoogleFonts.roboto().fontFamily,
+                                  fontWeight: FontWeight.normal),
+                            )),
+                      )
                           .toList());
                 }),
               ),

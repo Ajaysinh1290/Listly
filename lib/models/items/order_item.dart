@@ -1,4 +1,4 @@
-class Item {
+class OrderItem {
   late String itemId;
   late String title;
   late num price;
@@ -6,7 +6,7 @@ class Item {
   late String qtyType;
   late String currencySymbol;
 
-  Item(
+  OrderItem(
       {required this.itemId,
       required this.title,
       required this.price,
@@ -15,7 +15,7 @@ class Item {
       required this.qtyType,
       });
 
-  Item.fromJson(Map<String, dynamic> data) {
+  OrderItem.fromJson(Map<String, dynamic> data) {
     itemId = data['itemId'];
     title = data['title'];
     price = data['price'];

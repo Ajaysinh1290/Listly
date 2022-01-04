@@ -4,7 +4,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class MyTextField extends StatelessWidget {
-  final String labelText;
+  final String? labelText;
+  final String? hintText;
   final TextEditingController? controller;
   final FormFieldValidator? validator;
   final bool? obscureText;
@@ -19,11 +20,12 @@ class MyTextField extends StatelessWidget {
   final bool? readOnly;
   final Widget? suffixIcon;
   final Color? color;
+  final int? minLines;
   final ValueNotifier<Color> _labelColor = ValueNotifier(Colors.grey);
 
   MyTextField(
       {Key? key,
-      required this.labelText,
+      this.labelText,
       this.controller,
       this.validator,
       this.expanded,
@@ -37,6 +39,8 @@ class MyTextField extends StatelessWidget {
       this.enableInteractiveSelection,
       this.color,
       this.inputFormatters,
+      this.hintText,
+      this.minLines,
       this.suffixIcon})
       : super(key: key);
 
@@ -44,8 +48,7 @@ class MyTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     focusNode = focusNode ?? FocusNode();
     focusNode!.addListener(() {
-      _labelColor.value =
-          (focusNode!.hasFocus) ? Colors.black : Colors.grey;
+      _labelColor.value = (focusNode!.hasFocus) ? Colors.black : Colors.grey;
     });
     return Material(
       color: Colors.transparent,
@@ -56,6 +59,7 @@ class MyTextField extends StatelessWidget {
           return TextFormField(
             cursorColor: Theme.of(context).primaryColor,
             maxLines: expanded ?? false ? null : 1,
+            minLines: minLines ?? 1,
             validator: validator,
             readOnly: readOnly ?? false,
             inputFormatters: inputFormatters,
@@ -90,7 +94,12 @@ class MyTextField extends StatelessWidget {
                 labelStyle: Theme.of(context)
                     .textTheme
                     .headline6!
-                    .copyWith(color: value, fontWeight: FontWeight.normal)),
+                    .copyWith(color: value, fontWeight: FontWeight.normal),
+                hintText: hintText,
+                hintStyle: Theme.of(context)
+                    .textTheme
+                    .headline6!
+                    .copyWith(color: Colors.grey, fontWeight: FontWeight.normal)),
             style: Theme.of(context)
                 .textTheme
                 .headline6!

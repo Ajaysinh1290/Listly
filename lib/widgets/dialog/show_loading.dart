@@ -15,9 +15,11 @@ showLoading(String title) {
           SizedBox(
             width: 20.w,
           ),
-          Text(
-            'Deleting List...',
-            style: Theme.of(Get.context!).textTheme.headline4,
+          Expanded(
+            child: Text(
+              title,
+              style: Theme.of(Get.context!).textTheme.headline4,
+            ),
           )
         ],
       ),

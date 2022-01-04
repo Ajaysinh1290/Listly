@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:listly/models/item.dart';
 import 'package:get/get.dart';
+import 'package:listly/models/items/notes.dart';
 import 'package:share/share.dart';
 
 import 'create_pdf.dart';
 
-shareDataDialog(List<Item>? items, String title,String  listId) {
+shareDataDialog(List<Note>? items, String title, String listId) {
   if (items == null) {
     return;
   }
@@ -25,9 +25,7 @@ shareDataDialog(List<Item>? items, String title,String  listId) {
           InkWell(
             onTap: () {
               Get.back();
-              List<Item> sortedList =
-              items.where((element) => element.qty != 0).toList();
-              createPdf(sortedList, title, listId);
+              createPdf(items, title, listId);
             },
             child: SizedBox(
               width: double.infinity,
@@ -51,11 +49,8 @@ shareDataDialog(List<Item>? items, String title,String  listId) {
           InkWell(
             onTap: () async {
               String message = title + '\n\n';
-              for (Item item in items) {
-                if (item.qty != 0) {
-                  message +=
-                  '${item.title} (${item.price}${item.currencySymbol}) - ${item.qty} ${item.qtyType}\n';
-                }
+              for (Note item in items) {
+                message += '${item.title}\n${item.description}\n\n';
               }
               Get.back();
               await Share.share(message);
