@@ -80,10 +80,12 @@ class Notes extends StatelessWidget {
               listModel = ListModel.fromJson(snapshot.data.data());
             }
             return listModel == null
-                ? CircularProgressIndicator(
-                    color: ColorPalette.yellow,
-                    strokeWidth: 1,
-                  )
+                ? Center(
+                  child: CircularProgressIndicator(
+                      color: ColorPalette.yellow,
+                      strokeWidth: 1,
+                    ),
+                )
                 : FutureBuilder<Object>(
                     future: FirebaseFirestore.instance
                         .collection('users')
@@ -347,7 +349,8 @@ class Notes extends StatelessWidget {
         message: 'Add Item',
         child: InkWell(
           onTap: () async {
-            // createItemDialog(listModel!);
+            itemController.titleController.text = '';
+            itemController.descriptionController.text = '';
             Get.to(CreateItemScreen(listModel!));
           },
           child: Container(

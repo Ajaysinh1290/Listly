@@ -11,16 +11,18 @@ void resetOrders(String listId) async {
     return;
   }
   for (var item in itemController.list!) {
-    item.qty = 0;
-    String userId = Get.find<UserController>().user!.userId;
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(userId)
-        .collection('lists')
-        .doc(listId)
-        .collection('items')
-        .doc(item.itemId)
-        .set(item.toJson());
+    if (item.qty != 0) {
+      item.qty = 0;
+      String userId = Get.find<UserController>().user!.userId;
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .collection('lists')
+          .doc(listId)
+          .collection('items')
+          .doc(item.itemId)
+          .set(item.toJson());
+    }
   }
   itemController.refreshDataOnScreen();
   Get.back();

@@ -5,7 +5,7 @@ Listly provides you with ability to save and share your personal Shopping lists,
 It is truly usable with great user experience. It is designed to help you keep track of your lists and let you view your list items in the order you want. Listly lets you organize your lists in a manner to help you get your shopping done quickly.
 
 ### Youtube
-<img src="Youtube.png" width="100%">
+[<img src="Youtube.png" width="100%">](https://youtu.be/V9Tgo2jLDo4)
 
 
 ### Features
@@ -36,9 +36,9 @@ It is truly usable with great user experience. It is designed to help you keep t
     <li>Grocery List</li>
     <li>And many more...</li>
 
+
 </ul>
-  
 ### Mockups
 <img src="Mockup.png" width="100%">
 
- ### [Download Apk](Listly.apk)
+### [Download Apk](Listly.apk)

@@ -10,6 +10,7 @@ import 'package:intl/intl.dart';
 import 'package:listly/controllers/user_controller.dart';
 import 'package:listly/models/items/todo_item.dart';
 import 'package:listly/models/list_model.dart';
+import 'package:listly/screens/item/todo/utils/delete_completed_tasks.dart';
 import 'package:listly/screens/item/todo/utils/delete_item.dart';
 import 'package:listly/screens/item/todo/utils/create_item_dialog.dart';
 import 'package:listly/screens/item/todo/utils/share_data_dialog.dart';
@@ -56,6 +57,16 @@ class TodoItems extends StatelessWidget {
             }),
         actions: [
           IconButton(
+              tooltip: 'Delete completed tasks',
+              padding: EdgeInsets.zero,
+              onPressed: () =>
+                  deleteCompletedTasks(listId),
+              icon: const Icon(
+                Icons.delete,
+                color: Colors.black,
+                size: 20,
+              )),
+          IconButton(
               tooltip: 'Share Data',
               padding: EdgeInsets.zero,
               onPressed: () =>
@@ -79,9 +90,11 @@ class TodoItems extends StatelessWidget {
               listModel = ListModel.fromJson(snapshot.data.data());
             }
             return listModel == null
-                ? CircularProgressIndicator(
-                    color: ColorPalette.yellow,
-                    strokeWidth: 1,
+                ? Center(
+                    child: CircularProgressIndicator(
+                      color: ColorPalette.yellow,
+                      strokeWidth: 1,
+                    ),
                   )
                 : FutureBuilder<Object>(
                     future: FirebaseFirestore.instance
@@ -236,11 +249,14 @@ class TodoItems extends StatelessWidget {
                                                           Theme.of(context)
                                                               .primaryColor,
                                                       onTap: () {
-                                                        itemController.titleController.text = item.title;
-                                                        itemController.isDone = item.isDone;
+                                                        itemController
+                                                            .titleController
+                                                            .text = item.title;
+                                                        itemController.isDone =
+                                                            item.isDone;
                                                         createItemDialog(
-                                                            listModel!,
-                                                           );
+                                                          listModel!,
+                                                        );
                                                       },
                                                     )
                                                   ],
@@ -262,7 +278,8 @@ class TodoItems extends StatelessWidget {
                                                             listModel!,
                                                             item: item),
                                                     child: Container(
-                                                      padding: EdgeInsets.all(8.0.sp),
+                                                      padding: EdgeInsets.all(
+                                                          8.0.sp),
                                                       margin:
                                                           EdgeInsets.symmetric(
                                                               vertical: 10.h),
@@ -355,6 +372,8 @@ class TodoItems extends StatelessWidget {
         message: 'Add Item',
         child: InkWell(
           onTap: () async {
+            itemController.titleController.text = '';
+            itemController.isDone = false;
             createItemDialog(listModel!);
           },
           child: Container(
